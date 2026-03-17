@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand: #FF9900;
+  --color-dark: #000000;
+  --color-surface: #121212;
+  --color-surface-hover: #1a1a1a;
+}
+
+@layer base {
+  body {
+    @apply bg-dark text-white font-sans antialiased;
+  }
+}
+
+.carhub-logo {
+  @apply flex items-center font-extrabold text-2xl tracking-tighter;
+}
+
+.carhub-logo-text {
+  @apply text-white px-1;
+}
+
+.carhub-logo-box {
+  @apply bg-brand text-black px-1.5 py-0.5 rounded-md ml-0.5;
+}
+
+.btn-primary {
+  @apply bg-brand text-black font-bold px-6 py-3 rounded-md transition-all hover:scale-105 active:scale-95;
+}
+
+.btn-outline {
+  @apply border-2 border-brand text-brand font-bold px-6 py-3 rounded-md transition-all hover:bg-brand hover:text-black;
+}
