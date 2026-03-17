@@ -34,6 +34,10 @@ interface Product {
   price: string;
   image: string;
   tag?: string;
+  description?: string;
+  specs?: { label: string; value: string }[];
+  suitableCars?: string[];
+  priceRange?: string;
 }
 
 // --- Data ---
@@ -44,7 +48,15 @@ const PACKAGES: Product[] = [
     category: "Compact & Hatchback",
     price: "RM 2,499",
     image: "https://images.unsplash.com/photo-1551522435-a13afa10f103?auto=format&fit=crop&q=80&w=800",
-    tag: "Best Seller"
+    tag: "Best Seller",
+    description: "Our signature entry-level package designed to bring studio-quality clarity to daily drivers. Focused on wide-stage imaging and tight, punchy mid-bass.",
+    suitableCars: ["Perodua Myvi", "Honda City", "Toyota Yaris", "Honda Jazz", "Proton Iriz"],
+    priceRange: "RM 2,000 - RM 3,000",
+    specs: [
+      { label: "Speakers", value: "CH-Pro 6.5\" Component Set" },
+      { label: "Amplifier", value: "CH-Mini 2-Channel Integrated" },
+      { label: "Damping", value: "2-Layer Door Soundproofing" }
+    ]
   },
   {
     id: 2,
@@ -52,7 +64,15 @@ const PACKAGES: Product[] = [
     category: "Sedan & Luxury",
     price: "RM 4,899",
     image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800",
-    tag: "Premium"
+    tag: "Premium",
+    description: "Engineered for excellence. This setup transforms your luxury sedan into a dynamic concert hall, utilizing high-resolution amplifiers and precision-tuned component speakers.",
+    suitableCars: ["BMW 3 Series", "Mercedes C-Class", "Honda Civic FE", "Toyota Camry", "Tesla Model 3"],
+    priceRange: "RM 4,500 - RM 5,500",
+    specs: [
+      { label: "Speakers", value: "CH-Ultra 6.5\" Component + Coaxial" },
+      { label: "Subwoofer", value: "CH-X1 10\" Slim Active Sub" },
+      { label: "Amplifier", value: "CH-800.4 High-Resolution Digital" }
+    ]
   },
   {
     id: 3,
@@ -60,7 +80,15 @@ const PACKAGES: Product[] = [
     category: "SUV & 4x4",
     price: "RM 6,299",
     image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800",
-    tag: "High Power"
+    tag: "High Power",
+    description: "Massive output without compromise. Designed for larger cabins, this package delivers thunderous low-end and crystal-clear highs that cut through road noise.",
+    suitableCars: ["Toyota Hilux", "Ford Ranger", "Honda CR-V", "Mazda CX-5", "Proton X70"],
+    priceRange: "RM 6,000 - RM 7,500",
+    specs: [
+      { label: "Speakers", value: "CH-Elite 3-Way Front Stage" },
+      { label: "Subwoofer", value: "CH-Titan 12\" Ported Enclosure" },
+      { label: "Amplifier", value: "CH-Multi 1600W Multi-Channel System" }
+    ]
   }
 ];
 
@@ -70,34 +98,96 @@ const COMPONENTS: Product[] = [
     name: "CH-800.4 Amp",
     category: "4-Channel Digital",
     price: "RM 1,899",
-    image: ampImg
+    image: ampImg,
+    description: "A compact powerhouse. The CH-800.4 delivers clean, distortion-free power to your speakers, ensuring every detail of your music is heard with surgical precision.",
+    suitableCars: ["All Vehicle Models"],
+    priceRange: "RM 1,899",
+    specs: [
+      { label: "Power Output", value: "4 x 200W RMS @ 2 Ohms" },
+      { label: "Frequency Resp", value: "10Hz - 45kHz" },
+      { label: "THD", value: "< 0.05%" }
+    ]
   },
   {
     id: 5,
     name: "CH-Pro Speakers",
     category: "Component Set",
     price: "RM 999",
-    image: speakerImg
+    image: speakerImg,
+    description: "Superior vocal clarity and rich mid-range. Our CH-Pro series features an advanced silk-dome tweeter and a carbon-fiber reinforced cone for maximum durability.",
+    suitableCars: ["All Vehicle Models (6.5\" Standard)"],
+    priceRange: "RM 999",
+    specs: [
+      { label: "Sensitivity", value: "91dB" },
+      { label: "Power Handling", value: "120W RMS / 240W Peak" },
+      { label: "Tweeter", value: "25mm Silk Dome" }
+    ]
   },
   {
     id: 6,
     name: "CH-X1 Woofer",
     category: "12-inch Active",
     price: "RM 1,299",
-    image: subImg
+    image: subImg,
+    description: "Deep, controlled bass in a sleek enclosure. The CH-X1 is an active solution that saves space while delivering the low-end performance our brand is famous for.",
+    suitableCars: ["SUV", "Sedan", "Hatchback"],
+    priceRange: "RM 1,299",
+    specs: [
+      { label: "Enclosure Type", value: "Slot-Ported / Active" },
+      { label: "Built-in Amp", value: "500W RMS Digital Sub-Amp" },
+      { label: "Dimensions", value: "340 x 420 x 280 mm" }
+    ]
   },
   {
     id: 7,
     name: "CH-Wire Kit",
     category: "0 Gauge Power",
     price: "RM 299",
-    image: wiringImg
+    image: wiringImg,
+    description: "The foundation of a great system. Our premium 0-gauge wiring kit ensures your amplifiers receive the consistent current they need for peak performance.",
+    suitableCars: ["All High-Power Installations"],
+    priceRange: "RM 299",
+    specs: [
+      { label: "Gauge", value: "0 AWG Pure Oxygen-Free Copper" },
+      { label: "Fuse", value: "250A ANL Gold-Plated" },
+      { label: "Inclusions", value: "Power, Ground, Remote, RCAs" }
+    ]
   }
 ];
 
 // --- Components ---
 
-const Navbar = ({ setView, currentView }: { setView: (v: 'home' | 'about') => void, currentView: string }) => {
+const TransitionOverlay = ({ isTransitioning }: { isTransitioning: boolean }) => (
+  <AnimatePresence>
+    {isTransitioning && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed inset-0 bg-black z-[100] flex items-center justify-center"
+      >
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 1.5,
+            ease: "easeInOut"
+          }}
+          className="carhub-logo"
+        >
+          <span className="carhub-logo-text text-4xl uppercase">Car</span>
+          <span className="carhub-logo-box text-4xl uppercase">hub</span>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const Navbar = ({ setView, currentView }: { setView: (v: 'home' | 'about' | 'product') => void, currentView: string }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -258,11 +348,180 @@ const Hero = () => {
   );
 };
 
-function ProductCard({ product }: { product: Product, key?: React.Key }) {
+
+const ProductPage = ({ product, onBack }: { product: Product, onBack: () => void }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (!product) return null;
+
+  return (
+    <div className="pt-32 pb-24 bg-black min-h-screen">
+      <div className="max-w-7xl mx-auto px-6">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-brand font-bold uppercase tracking-widest text-sm mb-12 hover:translate-x-[-10px] transition-transform"
+        >
+          <ArrowRight className="rotate-180" size={16} /> Back to Browse
+        </button>
+
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="relative rounded-3xl overflow-hidden border border-white/10 aspect-square lg:aspect-auto lg:h-[600px]"
+          >
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              className="w-full h-full object-cover"
+            />
+            {product.tag && (
+              <div className="absolute top-8 left-8 bg-brand text-black text-xs font-black uppercase px-4 py-2 rounded-lg">
+                {product.tag}
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="text-sm font-black text-brand uppercase tracking-[0.3em] mb-4">{product.category}</div>
+            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-8 leading-none">
+              {product.name}
+            </h1>
+            
+            <div className="text-4xl font-extrabold mb-8 text-white">{product.price}</div>
+            
+            <p className="text-xl text-gray-400 leading-relaxed mb-12">
+              {product.description}
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-8 mb-12">
+              <div className="p-6 bg-surface rounded-2xl border border-white/5">
+                <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Suitable Cars</h4>
+                <div className="flex flex-wrap gap-2">
+                  {product.suitableCars?.map((car, i) => (
+                    <span key={i} className="text-sm font-bold text-white bg-white/5 px-3 py-1 rounded-md border border-white/5">
+                      {car}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 bg-surface rounded-2xl border border-white/5">
+                <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Price Range</h4>
+                <div className="text-lg font-bold text-brand uppercase">{product.priceRange}</div>
+                <p className="text-[10px] text-gray-500 mt-1 uppercase">Varies by installation complexity</p>
+              </div>
+            </div>
+
+            <div className="mb-12">
+              <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6">Technical Specs</h4>
+              <div className="space-y-4">
+                {product.specs?.map((spec, i) => (
+                  <div key={i} className="flex justify-between items-center py-4 border-b border-white/10 uppercase italic">
+                    <span className="text-gray-400 font-bold text-sm tracking-wide">{spec.label}</span>
+                    <span className="text-white font-black text-sm">{spec.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button className="w-full btn-primary py-6 text-xl" onClick={() => alert(`Enquiry sent for ${product.name}`)}>
+              BOOK INSTALLATION NOW
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductModal = ({ product, isOpen, onClose }: { product: Product | null, isOpen: boolean, onClose: () => void }) => {
+  if (!product) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+          />
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+          >
+            <button 
+              onClick={onClose}
+              className="absolute top-6 right-6 z-10 p-2 bg-black/50 backdrop-blur-md rounded-full border border-white/10 hover:bg-brand hover:text-black transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="grid md:grid-cols-2">
+              <div className="relative aspect-square md:aspect-auto">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent md:hidden" />
+              </div>
+
+              <div className="p-8 md:p-12">
+                <div className="text-xs font-black text-brand uppercase tracking-widest mb-4 italic">{product.category}</div>
+                <h2 className="text-4xl font-black uppercase tracking-tighter mb-4 leading-none">{product.name}</h2>
+                <div className="text-3xl font-extrabold text-white mb-8">{product.price}</div>
+                
+                <p className="text-gray-400 leading-relaxed mb-8 italic">
+                  {product.description}
+                </p>
+
+                <div className="space-y-4 mb-10">
+                  {product.specs?.map((spec, i) => (
+                    <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 uppercase text-xs">
+                      <span className="text-gray-500 font-bold tracking-widest">{spec.label}</span>
+                      <span className="text-white font-black italic">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button className="flex-1 btn-primary py-4" onClick={() => alert(`Enquiry sent for ${product.name}`)}>
+                    ENQUIRE NOW
+                  </button>
+                  <button className="sm:w-16 h-14 bg-white/5 border border-white/10 flex items-center justify-center rounded-xl hover:bg-brand hover:text-black transition-colors">
+                    <ShoppingCart size={24} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+
+
+function ProductCard({ product, onClick }: { product: Product, onClick: (p: Product) => void, key?: React.Key }) {
   return (
     <motion.div 
       whileHover={{ y: -10 }}
-      className="group bg-surface rounded-xl overflow-hidden border border-white/5 hover:border-brand/30 transition-all duration-300"
+      onClick={() => onClick(product)}
+      className="group bg-surface rounded-xl overflow-hidden border border-white/5 hover:border-brand/30 transition-all duration-300 cursor-pointer"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
         <img 
@@ -287,7 +546,7 @@ function ProductCard({ product }: { product: Product, key?: React.Key }) {
         <h3 className="text-xl font-bold mb-2 group-hover:text-brand transition-colors">{product.name}</h3>
         <div className="flex items-center justify-between">
           <span className="text-lg font-extrabold">{product.price}</span>
-          <button className="text-xs font-bold uppercase flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => alert(`Viewing details for ${product.name}`)}>
+          <button className="text-xs font-bold uppercase flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onClick(product); }}>
             Details <ArrowRight size={12} />
           </button>
         </div>
@@ -536,7 +795,30 @@ const AboutPage = ({ setView }: { setView: (v: 'home' | 'about') => void }) => {
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [view, setView] = useState<'home' | 'about'>('home');
+  const [view, setView] = useState<'home' | 'about' | 'product'>('home');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsTransitioning(true);
+    
+    // Pulse animation timing
+    setTimeout(() => {
+      setView('product');
+    }, 1200);
+
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 2200);
+  };
+
+  const handleCatalogueClick = (product: Product) => {
+    setModalProduct(product);
+    setIsModalOpen(true);
+  };
 
   const filteredComponents = COMPONENTS.filter(product => {
     if (activeCategory === 'All') return true;
@@ -548,6 +830,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen selection:bg-brand selection:text-black">
+      <TransitionOverlay isTransitioning={isTransitioning} />
+      <ProductModal 
+        product={modalProduct} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
       <Navbar setView={setView} currentView={view} />
       
       <main>
@@ -599,7 +887,7 @@ export default function App() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {filteredComponents.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} onClick={handleCatalogueClick} />
                   ))}
                 </div>
                 <div className="mt-16 text-center z-10 relative">
@@ -621,7 +909,7 @@ export default function App() {
                 />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {PACKAGES.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} onClick={handleProductClick} />
                   ))}
                 </div>
               </div>
@@ -647,9 +935,17 @@ export default function App() {
 
             <AwardDemo />
           </>
-        ) : (
+        ) : view === 'about' ? (
           <>
             <AboutPage setView={setView} />
+            <AwardDemo />
+          </>
+        ) : (
+          <>
+            <ProductPage 
+              product={selectedProduct!} 
+              onBack={() => setView('home')} 
+            />
             <AwardDemo />
           </>
         )}
@@ -659,3 +955,4 @@ export default function App() {
     </div>
   );
 }
+
