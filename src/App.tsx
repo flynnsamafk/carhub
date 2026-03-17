@@ -24,6 +24,7 @@ import ampImg from '../images/AMPS.png';
 import speakerImg from '../images/SPEAK.png';
 import subImg from '../images/WOODER.png';
 import wiringImg from '../images/WIRE.png';
+import { AwardDemo } from './components/AwardDemo';
 
 // --- Types ---
 interface Product {
@@ -96,7 +97,7 @@ const COMPONENTS: Product[] = [
 
 // --- Components ---
 
-const Navbar = () => {
+const Navbar = ({ setView, currentView }: { setView: (v: 'home' | 'about') => void, currentView: string }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -106,20 +107,42 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavClick = (id: string) => {
+    if (currentView !== 'home') {
+      setView('home');
+      setTimeout(() => {
+        document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: 'smooth' });
+    }
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black/90 backdrop-blur-md py-3 border-b border-white/10' : 'bg-transparent py-6'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || currentView === 'about' ? 'bg-black/90 backdrop-blur-md py-3 border-b border-white/10' : 'bg-transparent py-6'}`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div className="carhub-logo cursor-pointer">
+        <div className="carhub-logo cursor-pointer" onClick={() => { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
           <span className="carhub-logo-text uppercase">Car</span>
           <span className="carhub-logo-box uppercase">hub</span>
         </div>
 
         <div className="hidden md:flex items-center space-x-8">
-          {['Packages', 'Components', 'Headlights', 'About'].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-semibold uppercase tracking-wider hover:text-brand transition-colors">
+          {['Packages', 'Components', 'Headlights'].map((item) => (
+            <button 
+              key={item} 
+              onClick={() => handleNavClick(item)} 
+              className="text-sm font-semibold uppercase tracking-wider hover:text-brand transition-colors"
+            >
               {item}
-            </a>
+            </button>
           ))}
+          <button 
+            onClick={() => setView('about')} 
+            className={`text-sm font-semibold uppercase tracking-wider transition-colors ${currentView === 'about' ? 'text-brand' : 'hover:text-brand'}`}
+          >
+            About
+          </button>
         </div>
 
         <div className="flex items-center space-x-6">
@@ -135,33 +158,49 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-black z-[60] flex flex-col p-8"
-          >
-            <div className="flex justify-between items-center mb-12">
-              <div className="carhub-logo">
-                <span className="carhub-logo-text">Car</span>
-                <span className="carhub-logo-box">hub</span>
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[55]"
+            />
+            {/* Menu Drawer */}
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-[85%] bg-black z-[60] flex flex-col p-8 border-l border-white/10 shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-12">
+                <div className="carhub-logo">
+                  <span className="carhub-logo-text">Car</span>
+                  <span className="carhub-logo-box">hub</span>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)}><X size={32} /></button>
               </div>
-              <button onClick={() => setMobileMenuOpen(false)}><X size={32} /></button>
-            </div>
-            <div className="flex flex-col space-y-8">
-              {['Packages', 'Components', 'Headlights', 'About'].map((item) => (
-                <a 
-                  key={item} 
-                  href={`#${item.toLowerCase()}`} 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-3xl font-extrabold uppercase tracking-tighter hover:text-brand"
+              <div className="flex flex-col space-y-8">
+                {['Packages', 'Components', 'Headlights'].map((item) => (
+                  <button 
+                    key={item} 
+                    onClick={() => handleNavClick(item)}
+                    className="text-3xl font-extrabold uppercase tracking-tighter hover:text-brand text-left"
+                  >
+                    {item}
+                  </button>
+                ))}
+                <button 
+                  onClick={() => { setView('about'); setMobileMenuOpen(false); }}
+                  className={`text-3xl font-extrabold uppercase tracking-tighter text-left ${currentView === 'about' ? 'text-brand' : 'hover:text-brand'}`}
                 >
-                  {item}
-                </a>
-              ))}
-            </div>
-          </motion.div>
+                  About
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>
@@ -335,13 +374,13 @@ const ServiceSection = () => {
   );
 };
 
-const Footer = () => {
+const Footer = ({ setView }: { setView: (v: 'home' | 'about') => void }) => {
   return (
     <footer className="bg-surface pt-24 pb-12 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-1">
-            <div className="carhub-logo mb-6">
+            <div className="carhub-logo mb-6 cursor-pointer" onClick={() => setView('home')}>
               <span className="carhub-logo-text">Car</span>
               <span className="carhub-logo-box">hub</span>
             </div>
@@ -353,10 +392,10 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Shop</h4>
             <ul className="space-y-4 text-sm text-gray-500 font-medium">
-              <li><a href="#packages" className="hover:text-brand transition-colors relative z-10">Audio Packages</a></li>
-              <li><a href="#components" className="hover:text-brand transition-colors relative z-10">Subwoofers</a></li>
-              <li><a href="#components" className="hover:text-brand transition-colors relative z-10">Amplifiers</a></li>
-              <li><a href="#components" className="hover:text-brand transition-colors relative z-10">Speakers</a></li>
+              <li><button onClick={() => setView('home')} className="hover:text-brand transition-colors relative z-10">Audio Packages</button></li>
+              <li><button onClick={() => setView('home')} className="hover:text-brand transition-colors relative z-10">Subwoofers</button></li>
+              <li><button onClick={() => setView('home')} className="hover:text-brand transition-colors relative z-10">Amplifiers</button></li>
+              <li><button onClick={() => setView('home')} className="hover:text-brand transition-colors relative z-10">Speakers</button></li>
             </ul>
           </div>
 
@@ -364,7 +403,7 @@ const Footer = () => {
             <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Services</h4>
             <ul className="space-y-4 text-sm text-gray-500 font-medium">
               <li><button onClick={() => alert('Custom Tuning')} className="hover:text-brand transition-colors text-left relative z-10 w-full">Custom Tuning</button></li>
-              <li><a href="#headlights" className="hover:text-brand transition-colors relative z-10">Headlight Restoration</a></li>
+              <li><button onClick={() => setView('home')} className="hover:text-brand transition-colors text-left relative z-10 w-full">Headlight Restoration</button></li>
               <li><button onClick={() => alert('Sound Proofing')} className="hover:text-brand transition-colors text-left relative z-10 w-full">Sound Proofing</button></li>
               <li><button onClick={() => alert('Installation')} className="hover:text-brand transition-colors text-left relative z-10 w-full">Installation</button></li>
             </ul>
@@ -400,8 +439,104 @@ const Footer = () => {
   );
 };
 
+const AboutPage = ({ setView }: { setView: (v: 'home' | 'about') => void }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="pt-32 pb-24 bg-black min-h-screen">
+      <div className="max-w-7xl mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <SectionHeader 
+            title="The Heritage." 
+            subtitle="Built for the experience"
+          />
+          
+          <div className="grid md:grid-cols-2 gap-16 mt-16 items-center">
+            <div className="space-y-8">
+              <p className="text-2xl font-medium text-white leading-tight">
+                Carhub Audio started with a simple belief: <span className="text-brand">Hearing isn't enough.</span>
+              </p>
+              <div className="space-y-6 text-gray-400 leading-relaxed text-lg">
+                <p>
+                  We don't just sell speakers. We engineer sound stages. Since our inception, Timefall Studios has pushed the boundaries of automotive acoustic engineering, focusing on the raw emotion that only precision-tuned clarity can provide.
+                </p>
+                <p>
+                  Every component in our catalogue is hand-selected for its ability to reproduce sound as the artist intended—untouched, powerful, and deeply moving.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-8 pt-8">
+                <div>
+                  <div className="text-4xl font-black text-white mb-2">100+</div>
+                  <div className="text-xs font-bold text-brand uppercase tracking-widest">Custom Builds</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-2">15k</div>
+                  <div className="text-xs font-bold text-brand uppercase tracking-widest">Happy Drivers</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute -inset-4 bg-brand/10 blur-3xl rounded-full" />
+              <img 
+                src="https://images.unsplash.com/photo-1558232108-9bd65399583b?auto=format&fit=crop&q=80&w=1200" 
+                alt="Studio setup" 
+                className="relative rounded-2xl border border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="mt-32 grid sm:grid-cols-3 gap-12">
+            {[
+              { title: "Precision", icon: <Zap size={32} />, desc: "Every decibel accounted for. Every frequency optimized." },
+              { title: "Passion", icon: <Star size={32} />, desc: "We build for the drivers who live for the commute." },
+              { title: "Performance", icon: <Shield size={32} />, desc: "Rugged engineering that withstands the test of time." }
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="p-8 bg-surface rounded-xl border border-white/5"
+              >
+                <div className="text-brand mb-6">{item.icon}</div>
+                <h4 className="text-xl font-bold mb-4 uppercase">{item.title}</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-32 p-12 bg-brand rounded-2xl text-black text-center">
+            <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8">
+              CRAFTED BY TIMEFALL STUDIOS
+            </h3>
+            <p className="text-xl font-bold uppercase tracking-widest mb-10 opacity-80">
+              Join the elite circle of drivers.
+            </p>
+            <button 
+              className="bg-black text-white font-black px-12 py-5 rounded-full text-lg hover:scale-105 transition-transform"
+              onClick={() => setView('home')}
+            >
+              BROWSE OUR WORK
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [view, setView] = useState<'home' | 'about'>('home');
 
   const filteredComponents = COMPONENTS.filter(product => {
     if (activeCategory === 'All') return true;
@@ -413,103 +548,114 @@ export default function App() {
 
   return (
     <div className="min-h-screen selection:bg-brand selection:text-black">
-      <Navbar />
+      <Navbar setView={setView} currentView={view} />
       
       <main>
-        <Hero />
+        {view === 'home' ? (
+          <>
+            <Hero />
 
-        {/* Feature Banner */}
-        <section className="py-24 bg-brand text-black overflow-hidden relative">
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-             <div className="flex whitespace-nowrap text-[20vw] font-black uppercase leading-none select-none">
-                CARHUB CARHUB CARHUB CARHUB
-             </div>
-          </div>
-          <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-            <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-6">
-              NOT ALL SETUPS<br />HIT THE SAME.
-            </h2>
-            <p className="text-xl md:text-2xl font-bold uppercase tracking-widest mb-10 max-w-2xl mx-auto">
-              Precision-focused audio engineering for those who demand more.
-            </p>
-            <button 
-              className="bg-black text-white font-black px-12 py-5 rounded-full text-lg hover:scale-105 transition-transform"
-              onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              START YOUR BUILD
-            </button>
-          </div>
-        </section>
-
-        {/* Catalogue Section */}
-        <section id="components" className="py-24 bg-black">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-              <SectionHeader 
-                title="The Catalogue." 
-                subtitle="Precision components"
-              />
-              <div className="flex gap-4 z-10 relative">
-                {['All', 'Speakers', 'Amps', 'Subs'].map((cat) => (
-                  <button 
-                    key={cat} 
-                    onClick={() => setActiveCategory(cat)}
-                    className={`text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border transition-colors ${activeCategory === cat ? 'bg-white text-black border-white' : 'border-white/20 text-white hover:border-brand'}`}>
-                    {cat}
-                  </button>
-                ))}
+            {/* Feature Banner */}
+            <section className="py-24 bg-brand text-black overflow-hidden relative">
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                 <div className="flex whitespace-nowrap text-[20vw] font-black uppercase leading-none select-none">
+                    CARHUB CARHUB CARHUB CARHUB
+                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredComponents.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            <div className="mt-16 text-center z-10 relative">
-              <button className="btn-outline inline-flex items-center gap-2 hover:bg-white hover:text-black transition-colors" onClick={() => alert('Loading full catalogue...')}>
-                VIEW FULL CATALOGUE <ArrowRight size={18} />
-              </button>
-            </div>
-          </div>
-        </section>
+              <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+                <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-6">
+                  NOT ALL SETUPS<br />HIT THE SAME.
+                </h2>
+                <p className="text-xl md:text-2xl font-bold uppercase tracking-widest mb-10 max-w-2xl mx-auto">
+                  Precision-focused audio engineering for those who demand more.
+                </p>
+                <button 
+                  className="bg-black text-white font-black px-12 py-5 rounded-full text-lg hover:scale-105 transition-transform"
+                  onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  START YOUR BUILD
+                </button>
+              </div>
+            </section>
 
-        <ServiceSection />
+            {/* Catalogue Section */}
+            <section id="components" className="py-24 bg-black">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                  <SectionHeader 
+                    title="The Catalogue." 
+                    subtitle="Precision components"
+                  />
+                  <div className="flex gap-4 z-10 relative">
+                    {['All', 'Speakers', 'Amps', 'Subs'].map((cat) => (
+                      <button 
+                        key={cat} 
+                        onClick={() => setActiveCategory(cat)}
+                        className={`text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border transition-colors ${activeCategory === cat ? 'bg-white text-black border-white' : 'border-white/20 text-white hover:border-brand'}`}>
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {filteredComponents.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                <div className="mt-16 text-center z-10 relative">
+                  <button className="btn-outline inline-flex items-center gap-2 hover:bg-white hover:text-black transition-colors" onClick={() => alert('Loading full catalogue...')}>
+                    VIEW FULL CATALOGUE <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
+            </section>
 
-        {/* Packages Section */}
-        <section id="packages" className="py-24 bg-black">
-          <div className="max-w-7xl mx-auto px-6">
-            <SectionHeader 
-              title="Curated Packages." 
-              subtitle="Tailored for your drive"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {PACKAGES.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
+            <ServiceSection />
 
-        {/* CTA Section */}
-        <section className="py-32 bg-surface relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand to-transparent" />
-          <div className="max-w-4xl mx-auto px-6 text-center z-10 relative">
-            <Volume2 className="mx-auto text-brand mb-8" size={64} />
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-8">
-              READY TO FEEL<br />THE DIFFERENCE?
-            </h2>
-            <p className="text-xl text-gray-400 mb-12">
-              Join the elite circle of drivers who don't just listen, but experience.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <button className="btn-primary px-12 py-5 text-xl" onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}>GET STARTED</button>
-              <button className="btn-outline px-12 py-5 text-xl hover:bg-white hover:text-black transition-colors" onClick={() => alert('Locating nearest dealer...')}>LOCATE DEALER</button>
-            </div>
-          </div>
-        </section>
+            {/* Packages Section */}
+            <section id="packages" className="py-24 bg-black">
+              <div className="max-w-7xl mx-auto px-6">
+                <SectionHeader 
+                  title="Curated Packages." 
+                  subtitle="Tailored for your drive"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {PACKAGES.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-32 bg-surface relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand to-transparent" />
+              <div className="max-w-4xl mx-auto px-6 text-center z-10 relative">
+                <Volume2 className="mx-auto text-brand mb-8" size={64} />
+                <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-8">
+                  READY TO FEEL<br />THE DIFFERENCE?
+                </h2>
+                <p className="text-xl text-gray-400 mb-12">
+                  Join the elite circle of drivers who don't just listen, but experience.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  <button className="btn-primary px-12 py-5 text-xl" onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}>GET STARTED</button>
+                  <button className="btn-outline px-12 py-5 text-xl hover:bg-white hover:text-black transition-colors" onClick={() => alert('Locating nearest dealer...')}>LOCATE DEALER</button>
+                </div>
+              </div>
+            </section>
+
+            <AwardDemo />
+          </>
+        ) : (
+          <>
+            <AboutPage setView={setView} />
+            <AwardDemo />
+          </>
+        )}
       </main>
 
-      <Footer />
+      <Footer setView={setView} />
     </div>
   );
 }
